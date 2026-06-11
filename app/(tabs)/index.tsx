@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
+  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -11,7 +12,7 @@ import {
 import { usePersonajes } from "@/hooks/usePersonajes";
 
 export default function PersonajesScreen() {
-  const { personajes, loading } = usePersonajes();
+  const { personajes, loading, refetch } = usePersonajes();
 
   if (loading) {
     return (
@@ -27,6 +28,9 @@ export default function PersonajesScreen() {
         data={personajes}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={refetch} />
+        }
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}

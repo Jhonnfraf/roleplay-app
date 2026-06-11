@@ -11,9 +11,12 @@ import {
   View,
 } from "react-native";
 
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { useChat } from "@/hooks/useChat";
 
 export default function ChatScreen() {
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const {
     personaje,
@@ -74,7 +77,7 @@ export default function ChatScreen() {
         )}
       </ScrollView>
 
-      <View style={styles.inputBar}>
+      <View style={[styles.inputBar, { paddingBottom: insets.bottom || 12 }]}>
         <TextInput
           style={styles.input}
           value={inputText}

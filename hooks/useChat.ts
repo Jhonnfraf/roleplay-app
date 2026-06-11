@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { enviarMensaje } from "@/lib/openrouter";
 import { supabase } from "@/lib/supabase";
 
@@ -22,6 +22,13 @@ export function useChat(personajeId?: string) {
   const [loading, setLoading] = useState(false);
   const [conversacionId, setConversacionId] = useState<string | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
+
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const conversacionIdRef = useRef(conversacionId);
+  conversacionIdRef.current = conversacionId;
+  const personajeRef = useRef(personaje);
+  personajeRef.current = personaje;
 
   useEffect(() => {
     let query = supabase.from("personaje").select("*");
@@ -83,7 +90,8 @@ export function useChat(personajeId?: string) {
   }, [personajeId]);
 
   async function handleSend() {
-    if (!inputText.trim() || !personaje || loading) return;
+    const p = personajeRef.current;
+    if (!inputText.trim() || !p || loading) return;
 
     const userContent = inputText.trim();
     const userMsg: Message = { role: "user", content: userContent };
@@ -92,8 +100,9 @@ export function useChat(personajeId?: string) {
     setLoading(true);
 
     try {
-      const respuesta = await enviarMensaje(personaje.system_prompt, [
-        ...messages.map((m) => ({ role: m.role, content: m.content })),
+      const currentMessages = messagesRef.current;
+      const respuesta = await enviarMensaje(p.system_prompt, [
+        ...currentMessages.map((m) => ({ role: m.role, content: m.content })),
         { role: "user", content: userContent },
       ]);
       setMessages((prev) => [
@@ -101,16 +110,17 @@ export function useChat(personajeId?: string) {
         { role: "assistant", content: respuesta },
       ]);
 
-      if (conversacionId) {
+      const convId = conversacionIdRef.current;
+      if (convId) {
         await supabase.from("mensaje").insert([
           {
-            conversacion_id: conversacionId,
+            conversacion_id: convId,
             rol: "user",
             contenido: userContent,
             timestamp: new Date().toISOString(),
           },
           {
-            conversacion_id: conversacionId,
+            conversacion_id: convId,
             rol: "assistant",
             contenido: respuesta,
             timestamp: new Date().toISOString(),

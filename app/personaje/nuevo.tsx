@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -16,6 +16,7 @@ import {
 import { supabase } from "@/lib/supabase";
 
 export default function NuevoPersonajeScreen() {
+  const router = useRouter();
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -44,6 +45,7 @@ export default function NuevoPersonajeScreen() {
         return;
       }
 
+      router.dismissAll();
       router.push(`/chat/${data.id}`);
     } catch {
       Alert.alert("Error", "No se pudo crear el personaje");
